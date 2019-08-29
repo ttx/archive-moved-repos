@@ -1,14 +1,12 @@
+import argparse
 import os
+import sys
 
 import requests
 
 
-DRY_RUN = True
-TOKEN = os.environ['GITHUB_TOKEN']
-
-
 def read_to_be_archived():
-    with open('to-archive.txt') as f:
+    with open(args.filename) as f:
         repos = f.read().splitlines()
     return set(repos)
 
@@ -50,7 +48,7 @@ def archive_openstack_repo(namespace, repo, github_org):
         'archived': True,
     }
 
-    if not DRY_RUN:
+    if not args.dryrun:
         res = requests.patch(url, headers=headers, json=payload)
         data = res.json()
     print(f'archived: {repo}')
@@ -63,7 +61,25 @@ def archive_repos_in_namespace(namespace):
         archive_openstack_repo(namespace, repo, github_org)
 
 
-if __name__ == '__main__':
+def main(args=sys.argv[1:]):
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'filename',
+        help='file detailing the moves')
+    parser.add_argument(
+        '--dryrun',
+        default=False,
+        help='do not actually do anything',
+        action='store_true')
+    args = parser.parse_args(args)
+    if args.dryrun:
+        print('Running in dry run mode, no action will be actually taken')
+
+    TOKEN = os.environ['GITHUB_TOKEN']
     target_namespace = 'x'
     archive_repos_in_namespace(target_namespace)
     print_unarchivable_repos(target_namespace)
+
+
+if __name__ == '__main__':
+    main()
