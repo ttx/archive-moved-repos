@@ -31,7 +31,11 @@ def find_archivable_repos(filename):
 
 
 def archive_openstack_repo(token, namespace, repo, github_org):
-    url = f'https://api.github.com/repos/{github_org}/{repo}'
+    # Specific hack to handle openstack/stx-foo -> starlingx/foo rename
+    if namespace == 'starlingx':
+        url = f'https://api.github.com/repos/{github_org}/stx-{repo}'
+    else:
+        url = f'https://api.github.com/repos/{github_org}/{repo}'
     headers = {'Authorization': 'token %s' % token}
     payload = {
         'description': f'MOVED: now at https://opendev.org/{namespace}/{repo}',
