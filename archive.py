@@ -8,36 +8,26 @@ import requests
 def read_to_be_archived(filename):
     with open(filename) as f:
         repos = f.read().splitlines()
-    return set(repos)
+    return repos
 
 
-def print_unarchivable_repos(filename, namespace):
-    # finds repos planned to be archived which are *not* in namespace
-    opendev_repos = list_opendev_repos(namespace)
+def find_archivable_repos(filename):
+    opendev_repos = {}
+    archivable_repos = []
     to_be_archived = read_to_be_archived(filename)
-    unarchiveable = to_be_archived - opendev_repos
-    for repo in unarchiveable:
-        print(f'not archived: {repo}')
 
+    for reponame in to_be_archived:
+        ns, repo = reponame.split('/')
+        if ns not in opendev_repos:
+            data = requests.get(
+                f'https://opendev.org/api/v1/orgs/{ns}/repos').json()
+            opendev_repos[ns] = [r['name'] for r in data]
+        if repo not in opendev_repos[ns]:
+            print(f'not archived: {repo} (not in opendev {ns}/ namespace)')
+        else:
+            archivable_repos.append((ns, repo))
 
-def find_archivable_repos(filename, namespace):
-    # finds repos planned to be archived which are also in namespace
-    opendev_repos = list_opendev_repos(namespace)
-    to_be_archived = read_to_be_archived(filename)
-    return to_be_archived.intersection(opendev_repos)
-
-
-def list_opendev_repos(namespace):
-    data = requests.get(
-        f'https://opendev.org/api/v1/orgs/{namespace}/repos').json()
-    repos = [r['name'] for r in data]
-    return set(repos)
-
-
-def count_direct_matches():
-    # count how many repos in our list are found in the x namespace
-    repos = find_archivable_repos('x')
-    return len(repos)
+    return archivable_repos
 
 
 def archive_openstack_repo(token, namespace, repo, github_org):
@@ -51,14 +41,7 @@ def archive_openstack_repo(token, namespace, repo, github_org):
         res = requests.patch(url, headers=headers, json=payload)
         data = res.json()
 
-    print(f'archived: {repo}')
-
-
-def archive_repos_in_namespace(filename, token, namespace):
-    github_org = 'openstack'
-    repos = find_archivable_repos(filename, namespace)
-    for repo in repos:
-        archive_openstack_repo(token, namespace, repo, github_org)
+    print(f'archived: {github_org}/{repo} (moved to {namespace}/ on opendev)')
 
 
 def main(args=sys.argv[1:]):
@@ -83,9 +66,10 @@ def main(args=sys.argv[1:]):
         token = None
         print('Running in dry run mode, no action will be actually taken')
 
-    target_namespace = 'x'
-    archive_repos_in_namespace(args.filename, token, target_namespace)
-    print_unarchivable_repos(args.filename, target_namespace)
+    github_org = 'openstack'
+    repos = find_archivable_repos(args.filename)
+    for namespace, repo in repos:
+        archive_openstack_repo(token, namespace, repo, github_org)
 
 
 if __name__ == '__main__':
