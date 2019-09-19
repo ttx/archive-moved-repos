@@ -58,7 +58,7 @@ def load_mapping(token, filename):
     return checked_mapping
 
 
-def push_clean_commit(token, nsgh, repo, nsnew):
+def push_clean_commit(token, nsgh, repo, nsnew, reponew):
     previous_dir = os.getcwd()
     with tempfile.TemporaryDirectory() as tmpdirname:
         os.chdir(tmpdirname)
@@ -66,7 +66,7 @@ def push_clean_commit(token, nsgh, repo, nsnew):
         os.system("git rm -r * $(find . -maxdepth 1 -path './\.??*' -not -path './\.git')")
         with open('README.md', 'w') as readme:
             readme.write("# This repo has moved to OpenDev\n\n")
-            readme.write(f"It can now be found at [https://opendev.org/{nsnew}](https://opendev.org/{nsnew})\n")
+            readme.write(f"It can now be found at [https://opendev.org/{nsnew}/{reponew}](https://opendev.org/{nsnew}/{reponew})\n")
         os.system("git add README.md")
         os.system("git commit -m'Retire github mirror, repo moved to opendev'")
         if token:
@@ -121,7 +121,7 @@ def main(args=sys.argv[1:]):
         for old, new in mapping.items():
             nsold, repoold = old.split('/')
             nsnew, reponew = new.split('/')
-            push_clean_commit(token, nsold, repoold, nsnew)
+            push_clean_commit(token, nsold, repoold, nsnew, reponew)
             archive_openstack_repo(token, nsold, repoold, nsnew, reponew)
 
 
