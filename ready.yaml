@@ -24,7 +24,7 @@ openstack/ansible-role-bindep: x/ansible-role-bindep
 openstack/ansible-role-borgbackup: windmill/ansible-role-borgbackup
 openstack/ansible-role-borgmatic: windmill/ansible-role-borgmatic
 openstack/ansible-role-carbon: windmill/ansible-role-carbon
-openstack/ansible-role-cloud-launcher: x/ansible-role-cloud-launcher
+openstack/ansible-role-cloud-launcher: opendev/ansible-role-cloud-launcher
 openstack/ansible-role-diskimage-builder: windmill/ansible-role-diskimage-builder
 openstack/ansible-role-fedmsg: x/ansible-role-fedmsg
 openstack/ansible-role-gearman: windmill/ansible-role-gear
@@ -335,9 +335,6 @@ openstack/jacket: x/jacket
 openstack/jenkins-plugins-for-murano: x/jenkins-plugins-for-murano
 openstack/k8s-cloud-provider: x/k8s-cloud-provider
 openstack/k8s-docker-suite-app-murano: x/k8s-docker-suite-app-murano
-openstack/kayobe: x/kayobe
-openstack/kayobe-config: x/kayobe-config
-openstack/kayobe-config-dev: x/kayobe-config-dev
 openstack/kiloeyes: x/kiloeyes
 openstack/kingbird: x/kingbird
 openstack/kingbird-dashboard: x/kingbird-dashboard
